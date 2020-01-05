@@ -5,10 +5,27 @@ const Movie = require("../models/movie");
 
 router.get("/", (req, res, next) => {
     Movie.find()
+        // fetching only info that is useful
+        .select("name genre _id")
         .exec()
         .then(docs => {
-            console.log(docs);
-            res.status(200).json(docs);
+            const response = {
+                // addint the length of fetced array
+                count: docs.length,
+                movies: docs.map(doc => {
+                    return {
+                        name: doc.name,
+                        genre: doc.genre,
+                        _id: doc._id,
+                        // request for adding more info about the movie
+                        request: {
+                            type: "GET",
+                            url: "http://localhost:3000/movies/" + doc._id
+                        }
+                    }
+                })
+            };
+            res.status(200).json(response);
         })
         .catch(err => {
             console.log(err);
@@ -29,8 +46,16 @@ router.post("/", (req, res, next) => {
         console.log(result);
 
         res.status(201).json({
-            message: "Handling POST requests to /movies",
-            createdMovie: result
+            message: "Created product successfully",
+            createdMovie: {
+                name: result.name,
+                genre: result.genre,
+                _id: result._id,
+                request: {
+                    type: "GET",
+                    url: "http://localhost:3000/movies/" + result._id
+                }
+            }
         });
     }).catch(err => {
         console.log(err);
@@ -44,12 +69,20 @@ router.post("/", (req, res, next) => {
 router.get("/:movieId", (req, res, next) => {
     const id = req.params.movieId;
     Movie.findById(id)
+        .select("name genre _id")
         .exec()
         .then(doc => {
             console.log(doc);
             res.status(200).json(doc);
             if (doc) {
-                res.status(200).json(doc);
+                res.status(200).json({
+                    movie: doc,
+                    request: {
+                        type: "GET",
+                        description: "Get all movies",
+                        url: "http://localhost:3000/movies"
+                    }
+                });
             }
             else {
                 res.status(404).json({ message: "No valid entry found for provided ID" })
@@ -112,11 +145,6 @@ router.delete("/:movieId", (req, res, next) => {
                 error: err
             })
         })
-    // const id = req.params.movieId;
-    // res.status(200).json({
-    //     message: "Deleted movie: " + id,
-    //     id: id,
-    // });
 });
 
 module.exports = router;
