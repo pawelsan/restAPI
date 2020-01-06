@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const mongoose = require("mongoose");
 const Movie = require("../models/movie");
+const checkAuth = require("../middleware/check-auth");
 
 router.get("/", (req, res, next) => {
     Movie.find()
@@ -35,7 +36,7 @@ router.get("/", (req, res, next) => {
         });
 });
 
-router.post("/", (req, res, next) => {
+router.post("/", checkAuth, (req, res, next) => {
 
     const movie = new Movie({
         _id: new mongoose.Types.ObjectId(),
@@ -106,7 +107,7 @@ router.post("/:movieId", (req, res, next) => {
     });
 });
 
-router.patch("/:movieId", (req, res, next) => {
+router.patch("/:movieId", checkAuth, (req, res, next) => {
     const id = req.params.movieId;
     const updateOps = {};
     for (const ops of req.body) {
@@ -132,7 +133,7 @@ router.patch("/:movieId", (req, res, next) => {
     // });
 });
 
-router.delete("/:movieId", (req, res, next) => {
+router.delete("/:movieId", checkAuth, (req, res, next) => {
     const id = req.params.movieId;
     Movie.remove({ _id: id })
         .exec()

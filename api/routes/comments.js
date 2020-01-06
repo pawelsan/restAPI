@@ -3,6 +3,7 @@ const router = express.Router();
 const mongoose = require("mongoose");
 const Comment = require("../models/comment");
 const Movie = require("../models/movie")
+const checkAuth = require("../middleware/check-auth");
 
 // Handle incomming GET requests to /comments
 router.get("/", (req, res, next) => {
@@ -36,7 +37,7 @@ router.get("/", (req, res, next) => {
         });
 });
 
-router.post("/", (req, res, next) => {
+router.post("/", checkAuth, (req, res, next) => {
     // Solution implemented to avoid commenting movies that do not exist in the database
     Movie.findById(req.body.movieId)
         .then(movie => {
@@ -109,7 +110,7 @@ router.get("/:commentId", (req, res, next) => {
 // });
 
 
-router.delete("/:commentId", (req, res, next) => {
+router.delete("/:commentId", checkAuth, (req, res, next) => {
     const id = req.params.commentId;
     Comment.remove({ _id: id })
         .exec()

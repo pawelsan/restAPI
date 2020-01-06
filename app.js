@@ -6,6 +6,9 @@ const mongoose = require("mongoose");
 
 const moviesRoutes = require("./api/routes/movies");
 const commentsRoutes = require("./api/routes/comments");
+const userRoutes = require("./api/routes/users");
+
+// middleware for securing database password
 require('dotenv').config();
 const password = process.env.PASSWORD
 
@@ -30,9 +33,10 @@ app.use((res, req, next) => {
     }
     next();
 })
-
+// forwarding requests to specified routes
 app.use("/movies", moviesRoutes);
 app.use("/comments", commentsRoutes);
+app.use("/users", userRoutes);
 
 app.use((req, res, next) => {
     const error = new Error("not found");
