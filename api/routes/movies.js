@@ -1,13 +1,16 @@
 const express = require("express");
 const router = express.Router();
+const request = require("request");
 const mongoose = require("mongoose");
 const Movie = require("../models/movie");
 const checkAuth = require("../middleware/check-auth");
+require('dotenv').config();
+const apikey = process.env.APIKEY;
 
 router.get("/", (req, res, next) => {
     Movie.find()
         // fetching only info that is useful
-        .select("name genre _id")
+        .select("title year _id")
         .exec()
         .then(docs => {
             const response = {
@@ -15,8 +18,8 @@ router.get("/", (req, res, next) => {
                 count: docs.length,
                 movies: docs.map(doc => {
                     return {
-                        name: doc.name,
-                        genre: doc.genre,
+                        title: doc.title,
+                        year: doc.year,
                         _id: doc._id,
                         // request for adding more info about the movie
                         request: {
@@ -36,45 +39,89 @@ router.get("/", (req, res, next) => {
         });
 });
 
-router.post("/", checkAuth, (req, res, next) => {
-
-    const movie = new Movie({
-        _id: new mongoose.Types.ObjectId(),
-        name: req.body.name,
-        genre: req.body.genre,
-    })
-    movie.save().then(result => {
-        console.log(result);
-
-        res.status(201).json({
-            message: "Created product successfully",
-            createdMovie: {
-                name: result.name,
-                genre: result.genre,
-                _id: result._id,
-                request: {
-                    type: "GET",
-                    url: "http://localhost:3000/movies/" + result._id
-                }
+router.post("/",
+    // checkAuth, 
+    (req, res, next) => {
+        // options object for request to external API
+        const options = {
+            url: `http://www.omdbapi.com/?apikey=${apikey}&plot=full&t=`,
+            method: "GET",
+            qs: {
+                t: req.body.title,
             }
-        });
-    }).catch(err => {
-        console.log(err);
-        res.status(500).json({
-            error: err
+        }
+
+        request(options, (error, response, body) => {
+            const data = JSON.parse(body)
+            // checking if searched movie exists in the external API
+            if (data.Response === "False") {
+                return res.status(404).json({ message: data.Error })
+            }
+            // if data was fetched, although the movie title found differs from the request
+            else if (req.body.title !== data.Title) {
+                return res.status(303).json({
+                    message: `Found a movie with a similar title: ${data.Title}. Please use this exact title.`
+                })
+            }
+            else {
+                Movie.find({ title: data.Title })
+                    .exec()
+                    .then(movie => {
+                        // If movie found meaning if array of movies is not empty
+                        if (movie.length >= 1) {
+                            return res.status(409).json({
+                                message: "Movie with provided title already exists in the database"
+                            })
+                        } else {
+                            const movie = new Movie({
+                                title: data.Title,
+                                year: data.Year,
+                                rated: data.Rated,
+                                released: data.Released,
+                                runtime: data.Runtime,
+                                genre: data.Genre,
+                                director: data.Director,
+                                writer: data.Writer,
+                                actors: data.Actors,
+                                plot: data.Plot,
+                                language: data.Language,
+                                country: data.Country,
+                                awards: data.Awards,
+                                ratings: data.Ratings,
+                                _id: new mongoose.Types.ObjectId(),
+                            })
+                            movie.save().then(result => {
+                                res.status(201).json({
+                                    message: "Fetched and saved movie data successfully",
+                                    createdMovie: {
+                                        title: result.title,
+                                        genre: result.genre,
+                                        _id: result._id,
+                                        request: {
+                                            type: "GET",
+                                            url: "http://localhost:3000/movies/" + result._id
+                                        }
+                                    }
+                                });
+                            }).catch(err => {
+                                console.log(err);
+                                res.status(500).json({
+                                    error: err
+                                })
+                            });
+                        }
+                    })
+            }
+
         })
     });
-
-});
 
 router.get("/:movieId", (req, res, next) => {
     const id = req.params.movieId;
     Movie.findById(id)
-        .select("name genre _id")
+        .select("title year rated released runtime genre director writer actors country awards plot language ratings _id")
         .exec()
         .then(doc => {
-            console.log(doc);
-            res.status(200).json(doc);
             if (doc) {
                 res.status(200).json({
                     movie: doc,
@@ -93,10 +140,6 @@ router.get("/:movieId", (req, res, next) => {
             console.log(err);
             res.status(500).json({ error: err })
         });
-    // res.status(200).json({
-    //     message: "Movie id is " + id,
-    //     id: id,
-    // });
 });
 
 router.post("/:movieId", (req, res, next) => {
@@ -127,25 +170,23 @@ router.patch("/:movieId", checkAuth, (req, res, next) => {
                 error: err
             })
         });
-    // res.status(200).json({
-    //     message: "Updated movie: " + id,
-    //     id: id,
-    // });
 });
 
-router.delete("/:movieId", checkAuth, (req, res, next) => {
-    const id = req.params.movieId;
-    Movie.remove({ _id: id })
-        .exec()
-        .then(result => {
-            res.status(200).json(result);
-        })
-        .catch(err => {
-            console.log(err);
-            res.status(500).json({
-                error: err
+router.delete("/:movieId",
+    // checkAuth,
+    (req, res, next) => {
+        const id = req.params.movieId;
+        Movie.remove({ _id: id })
+            .exec()
+            .then(result => {
+                res.status(200).json(result);
             })
-        })
-});
+            .catch(err => {
+                console.log(err);
+                res.status(500).json({
+                    error: err
+                })
+            })
+    });
 
 module.exports = router;
