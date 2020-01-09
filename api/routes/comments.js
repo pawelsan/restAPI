@@ -4,7 +4,6 @@ const request = require("request");
 const mongoose = require("mongoose");
 const Comment = require("../models/comment");
 const Movie = require("../models/movie")
-// const checkAuth = require("../config/check-auth");
 
 // Handle incomming GET requests to /comments
 router.get("/", (req, res, next) => {
@@ -40,8 +39,6 @@ router.get("/", (req, res, next) => {
 });
 
 router.post("/",
-    // Eventually checkAuth not used but left for the future just in case
-    // checkAuth,
     (req, res, next) => {
         console.dir(req.body)
         // Solution implemented to avoid commenting movies that do not exist in the database
@@ -55,9 +52,6 @@ router.post("/",
                     return res.status(404).render('post-status', {
                         message: "Movie not found"
                     })
-                    // .json({
-                    //     message: "Movie not found"
-                    // });
                 }
                 else {
                     const comment = new Comment({
@@ -69,20 +63,6 @@ router.post("/",
                         res.status(201).render('post-status', {
                             message: `Created comment: "${result.content}". With relation to ${movie.title} (movie ID: ${result.movie}). Comment ID ${result._id}. You can request it with "GET" from: http://localhost:3000/movies/${result._id}`
                         })
-
-                        // .json({
-                        //     message: "Comment saved",
-                        //     createdComment: {
-                        //         _id: result._id,
-                        //         movieId: result.movie,
-                        //         title: result.title,
-                        //         content: result.content,
-                        //     },
-                        //     request: {
-                        //         type: "GET",
-                        //         rl: "http://localhost:3000/comments/" + result._id
-                        //     }
-                        // })
                     }).catch(err => {
                         console.log(500).json({
                             error: err
@@ -118,9 +98,8 @@ router.get("/:commentId", (req, res, next) => {
         })
 });
 
+// Deleting - not implemented on the frontend
 router.delete("/:commentId",
-    // Eventually checkAuth not used but left for the future just in case
-    // checkAuth,
     (req, res, next) => {
         const id = req.params.commentId;
         Comment.remove({ _id: id })

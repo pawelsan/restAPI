@@ -4,11 +4,6 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const passport = require("passport");
 
-// Leftovers from token authentication option
-// const jwt = require("jsonwebtoken");
-// require('dotenv').config();
-// const JWT_KEY = process.env.JWT_KEY;
-
 const User = require("../models/user");
 
 
@@ -107,47 +102,6 @@ router.post("/login", (req, res, next) => {
         failureRedirect: '/users/login',
         failureFlash: true
     })(req, res, next);
-    // Leftovers from token authentication option considered previously
-    // User.find({ email: req.body.email })
-    //     .exec()
-    //     .then(user => {
-    //         if (user.length < 1) {
-    //             return res.status(401).json({
-    //                 message: "Auth failed"
-    //             })
-    //         }
-    //         bcrypt.compare(req.body.password, user[0].password, (err, result) => {
-    //             if (err) {
-    //                 return res.status(401).json({
-    //                     message: "Auth failed"
-    //                 })
-    //             } else if (result) {
-    //                 // creating token with jsonwebtoken
-    //                 const token = jwt.sign({
-    //                     email: user[0].email,
-    //                     userId: user[0]._id,
-    //                 },
-    //                     JWT_KEY,
-    //                     {
-    //                         expiresIn: "1h"
-    //                     },
-    //                 );
-    //                 return res.status(200).json({
-    //                     message: "Auth successful",
-    //                     token,
-    //                 });
-    //             } else {
-    //                 return res.status(401).json({
-    //                     message: "Auth failed"
-    //                 })
-    //             }
-    //         })
-    //     })
-    //     .catch(err => {
-    //         res.status(500).json({
-    //             error: err
-    //         })
-    //     });
 })
 
 // Logout handle

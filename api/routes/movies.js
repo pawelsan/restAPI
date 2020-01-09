@@ -3,7 +3,6 @@ const router = express.Router();
 const request = require("request");
 const mongoose = require("mongoose");
 const Movie = require("../models/movie");
-// const checkAuth = require("../config/check-auth");
 require('dotenv').config();
 const apikey = process.env.APIKEY;
 
@@ -40,8 +39,6 @@ router.get("/", (req, res, next) => {
 });
 
 router.post("/",
-    // Eventually checkAuth not used but left for the future just in case
-    // checkAuth, 
     (req, res, next) => {
         // options object for request to external API
         const options = {
@@ -59,16 +56,12 @@ router.post("/",
                 return res.status(404).render('post-status', {
                     message: data.Error
                 })
-                // .json({ message: data.Error })
             }
             // if data was fetched, although the movie title found differs from the request
             else if (req.body.title !== data.Title) {
                 return res.status(303).render('post-status', {
                     message: `Found a movie with a similar title: ${data.Title}. Please use this exact title (case sensitive).`
                 })
-                //     .json({
-                //         message: `Found a movie with a similar title: ${data.Title}. Please use this exact title.`
-                //     })
             }
             else {
                 Movie.find({ title: data.Title })
@@ -79,9 +72,6 @@ router.post("/",
                             return res.status(409).render('post-status', {
                                 message: "Movie with provided title already exists in the database."
                             })
-                            // .json({
-                            //     message: "Movie with provided title already exists in the database"
-                            // })
                         } else {
                             const movie = new Movie({
                                 title: data.Title,
@@ -104,18 +94,6 @@ router.post("/",
                                 res.status(201).render('post-status', {
                                     message: `Fetched and saved movie data successfully. Created movie: ${result.title} (${result.genre}), with ID of ${result._id}. You can request it with "GET" from: http://localhost:3000/movies/${result._id}`
                                 })
-                                // .json({
-                                //     message: "Fetched and saved movie data successfully",
-                                //     createdMovie: {
-                                //         title: result.title,
-                                //         genre: result.genre,
-                                //         _id: result._id,
-                                //         request: {
-                                //             type: "GET",
-                                //             url: "http://localhost:3000/movies/" + result._id
-                                //         }
-                                //     }
-                                // });
                             }).catch(err => {
                                 console.log(err);
                                 res.status(500).json({
@@ -165,8 +143,6 @@ router.post("/:movieId", (req, res, next) => {
 
 // Patching - not implemented on the frontend
 router.patch("/:movieId",
-    // Eventually checkAuth not used but left for the future just in case
-    // checkAuth, 
     (req, res, next) => {
         const id = req.params.movieId;
         const updateOps = {};
@@ -191,7 +167,6 @@ router.patch("/:movieId",
 
 // Deleting - not implemented on the frontend
 router.delete("/:movieId",
-    // checkAuth,
     (req, res, next) => {
         const id = req.params.movieId;
         Movie.remove({ _id: id })
