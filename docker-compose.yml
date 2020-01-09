@@ -1,0 +1,8 @@
+version: '2'
+services:
+  app:
+    container_name: docker-node-mongo
+    restart: always
+    build: .
+    ports:
+      - '80:3000'
