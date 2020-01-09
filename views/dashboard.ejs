@@ -5,31 +5,27 @@
 <a href="/users/logout" class="btn btn-secondary">Logout</a>
 <div class="row mt-5">
     <div class="col-md-6 m-auto">
-        <div class="card card-body">
+        <div class="card card-body text-center">
             <form action="/movies" method="POST">
                 <div class="form-group">
-                    <label for="movie">Type in a movie title to add to the database</label>
+                    <label for="movie">Type in a movie title to add to my database</label>
                     <input type="text" id="title" name="title" class="form-control" placeholder="Enter a title" />
                 </div>
                 <button type="submit" class="btn btn-primary btn-block">Submit</button>
             </form>
             <br>
             <p>or</p>
+            <br>
             <form action="/comments" method="POST">
                 <div class="form-group">
-                    <label for="movie">Type in a movie ID to add a comment</label>
+                    <label for="movie">Type in a movie ID to add your comment...</label>
                     <input type="text" id="movieId" name="movieId" class="form-control" placeholder="Enter an ID" />
-                    <label for="movie">Type your comment</label>
+                    <label for="movie">... and type your comment</label>
                     <input type="text" id="content" name="content" class="form-control" placeholder="Enter your text" />
                 </div>
                 <button type="submit" class="btn btn-primary btn-block">Submit</button>
             </form>
-            <p class="lead mt-4">
-                All movies in the database can be fetched using the following url: <a href="/movies">http://localhost:3000/movies</a>
-            </p>
-            <p class="lead mt-4">
-                All comments are under: <a href="/comments">http://localhost:3000/comments</a>
-            </p>
+            <%- include("guidelines") -%>
         </div>
     </div>
 </div>

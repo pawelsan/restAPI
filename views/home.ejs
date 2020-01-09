@@ -1,16 +1,14 @@
 <div class="row mt-5">
   <div class="col-md-6 m-auto">
     <div class="card card-body text-center">
-      <h1><i class="fas fa-film"></i></h1>
-      <p class="lead mt-4">
-        All movies in the database can be fetched using the following url: <a href="/movies">http://localhost:3000/movies</a>
-      </p>
-      <p class="lead mt-4">
-        All comments are under: <a href="/comments">http://localhost:3000/comments</a>
-      </p>
-      <p class="lead mt-4">If you want to add movies or comments, create an account or login</p>
+      <h1 class="text-center mb-3"><i class="fas fa-film"></i></h1>
+      <h2>Movie Database</h2>
+      <span>powered by</span><a href="http://www.omdbapi.com/">OMDb API</a>
+      <%- include("guidelines") -%>
+      <p class="lead mt-4">If you want to post movies or comments, sign up or login</p>
       <a href="/users/signup" class="btn btn-primary btn-block mb-2">Sign Up</a>
       <a href="/users/login" class="btn btn-secondary btn-block">Login</a>
+      <span class="mt-3">&copyPaweł Hińcza 2020</span>
     </div>
   </div>
 </div>
