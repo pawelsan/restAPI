@@ -1,9 +1,10 @@
 const express = require("express");
 const router = express.Router();
+const request = require("request");
 const mongoose = require("mongoose");
 const Comment = require("../models/comment");
 const Movie = require("../models/movie")
-const checkAuth = require("../middleware/check-auth");
+// const checkAuth = require("../config/check-auth");
 
 // Handle incomming GET requests to /comments
 router.get("/", (req, res, next) => {
@@ -11,7 +12,7 @@ router.get("/", (req, res, next) => {
         .find()
         .select("movie content _id")
         // line below used for linking with the movie module
-        .populate("movie", "name")
+        .populate("movie", "title")
         .exec()
         .then(docs => {
             res.status(200).json({
@@ -19,6 +20,7 @@ router.get("/", (req, res, next) => {
                 comments: docs.map(doc => {
                     return {
                         movie: doc.movie,
+                        title: doc.title,
                         commentId: doc._id,
                         content: doc.content,
                         request: {
@@ -37,44 +39,59 @@ router.get("/", (req, res, next) => {
         });
 });
 
-router.post("/", checkAuth, (req, res, next) => {
-    // Solution implemented to avoid commenting movies that do not exist in the database
-    Movie.findById(req.body.movieId)
-        .then(movie => {
-            if (!movie) {
-                return res.status(404).json({
-                    message: "Product not found"
-                });
-            }
-            const comment = new Comment({
-                _id: new mongoose.Types.ObjectId(),
-                movieId: req.body.movieId,
-                content: req.body.content,
-            });
-            return comment
-                .save()
-        })
-        .then(result => {
-            console.log(result);
-            res.status(201).json({
-                message: "Comment saved",
-                createdComment: {
-                    _id: result._id,
-                    movieId: result.movie,
-                    content: result.content,
-                },
-                request: {
-                    type: "GET",
-                    rl: "http://localhost:3000/comments/" + result._id
+router.post("/",
+    // Eventually checkAuth not used but left for the future just in case
+    // checkAuth,
+    (req, res, next) => {
+        console.dir(req.body)
+        // Solution implemented to avoid commenting movies that do not exist in the database
+        Movie.findById(req.body.movieId)
+            .exec()
+            .catch(err => {
+                console.log(500)
+            })
+            .then(movie => {
+                if (!movie) {
+                    return res.status(404).render('post-status', {
+                        message: "Movie not found"
+                    })
+                    // .json({
+                    //     message: "Movie not found"
+                    // });
+                }
+                else {
+                    const comment = new Comment({
+                        _id: new mongoose.Types.ObjectId(),
+                        movie: req.body.movieId,
+                        content: req.body.content,
+                    });
+                    comment.save().then(result => {
+                        res.status(201).render('post-status', {
+                            message: `Created comment: "${result.content}". With relation to ${movie.title} (movie ID: ${result.movie}). Comment ID ${result._id}. You can request it with "GET" from: http://localhost:3000/movies/${result._id}`
+                        })
+
+                        // .json({
+                        //     message: "Comment saved",
+                        //     createdComment: {
+                        //         _id: result._id,
+                        //         movieId: result.movie,
+                        //         title: result.title,
+                        //         content: result.content,
+                        //     },
+                        //     request: {
+                        //         type: "GET",
+                        //         rl: "http://localhost:3000/comments/" + result._id
+                        //     }
+                        // })
+                    }).catch(err => {
+                        console.log(500).json({
+                            error: err
+                        });
+                    });
                 }
             })
-        })
-        .catch(err => {
-            console.log(500).json({
-                error: err
-            });
-        });
-});
+
+    });
 
 router.get("/:commentId", (req, res, next) => {
     Comment.findById(req.params.commentId)
@@ -101,33 +118,27 @@ router.get("/:commentId", (req, res, next) => {
         })
 });
 
-// router.post("/:commentId", (req, res, next) => {
-//     const id = req.params.commentId;
-//     res.status(201).json({
-//         message: "Comment id is " + id,
-//         id: id,
-//     });
-// });
-
-
-router.delete("/:commentId", checkAuth, (req, res, next) => {
-    const id = req.params.commentId;
-    Comment.remove({ _id: id })
-        .exec()
-        .then(result => {
-            res.status(200).json({
-                message: "Comment deleted",
-                request: {
-                    type: "POST",
-                    url: "http://localhost:3000/comments",
-                }
-            });
-        })
-        .catch(err => {
-            res.status(500).json({
-                error: err
+router.delete("/:commentId",
+    // Eventually checkAuth not used but left for the future just in case
+    // checkAuth,
+    (req, res, next) => {
+        const id = req.params.commentId;
+        Comment.remove({ _id: id })
+            .exec()
+            .then(result => {
+                res.status(200).json({
+                    message: "Comment deleted",
+                    request: {
+                        type: "POST",
+                        url: "http://localhost:3000/comments",
+                    }
+                });
             })
-        })
-});
+            .catch(err => {
+                res.status(500).json({
+                    error: err
+                })
+            })
+    });
 
 module.exports = router;

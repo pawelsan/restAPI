@@ -2,7 +2,32 @@
   <div class="col-md-6 m-auto">
     <div class="card card-body">
       <h1 class="text-center mb-3"><i class="fas fa-sign-in-alt"></i> Login <i class="fas fa-film"></i></h1>
-
+      <!-- Messages - success and error -->
+      <% if(success_msg != ''){ %>
+      <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <%= success_msg %>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <% } %>
+      <% if(error_msg != ''){ %>
+      <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <%= error_msg %>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <% } %>
+      <% if(error != ''){ %>
+      <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <%= error %>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <% } %>
+      <!-- End of messages - success and error -->
       <form action="/users/login" method="POST">
         <div class="form-group">
           <label for="email">Email</label>
@@ -15,7 +40,7 @@
         <button type="submit" class="btn btn-primary btn-block">Login</button>
       </form>
       <p class="lead mt-4">
-        No Account? <a href="/users/register">Register</a>
+        No Account? <a href="/users/signup">Sign up!</a>
       </p>
     </div>
   </div>

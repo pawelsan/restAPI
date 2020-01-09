@@ -3,7 +3,7 @@ const router = express.Router();
 const request = require("request");
 const mongoose = require("mongoose");
 const Movie = require("../models/movie");
-const checkAuth = require("../middleware/check-auth");
+// const checkAuth = require("../config/check-auth");
 require('dotenv').config();
 const apikey = process.env.APIKEY;
 
@@ -40,6 +40,7 @@ router.get("/", (req, res, next) => {
 });
 
 router.post("/",
+    // Eventually checkAuth not used but left for the future just in case
     // checkAuth, 
     (req, res, next) => {
         // options object for request to external API
@@ -55,13 +56,19 @@ router.post("/",
             const data = JSON.parse(body)
             // checking if searched movie exists in the external API
             if (data.Response === "False") {
-                return res.status(404).json({ message: data.Error })
+                return res.status(404).render('post-status', {
+                    message: data.Error
+                })
+                // .json({ message: data.Error })
             }
             // if data was fetched, although the movie title found differs from the request
             else if (req.body.title !== data.Title) {
-                return res.status(303).json({
-                    message: `Found a movie with a similar title: ${data.Title}. Please use this exact title.`
+                return res.status(303).render('post-status', {
+                    message: `Found a movie with a similar title: ${data.Title}. Please use this exact title (case sensitive).`
                 })
+                //     .json({
+                //         message: `Found a movie with a similar title: ${data.Title}. Please use this exact title.`
+                //     })
             }
             else {
                 Movie.find({ title: data.Title })
@@ -69,9 +76,12 @@ router.post("/",
                     .then(movie => {
                         // If movie found meaning if array of movies is not empty
                         if (movie.length >= 1) {
-                            return res.status(409).json({
-                                message: "Movie with provided title already exists in the database"
+                            return res.status(409).render('post-status', {
+                                message: "Movie with provided title already exists in the database."
                             })
+                            // .json({
+                            //     message: "Movie with provided title already exists in the database"
+                            // })
                         } else {
                             const movie = new Movie({
                                 title: data.Title,
@@ -91,18 +101,21 @@ router.post("/",
                                 _id: new mongoose.Types.ObjectId(),
                             })
                             movie.save().then(result => {
-                                res.status(201).json({
-                                    message: "Fetched and saved movie data successfully",
-                                    createdMovie: {
-                                        title: result.title,
-                                        genre: result.genre,
-                                        _id: result._id,
-                                        request: {
-                                            type: "GET",
-                                            url: "http://localhost:3000/movies/" + result._id
-                                        }
-                                    }
-                                });
+                                res.status(201).render('post-status', {
+                                    message: `Fetched and saved movie data successfully. Created movie: ${result.title} (${result.genre}), with ID of ${result._id}. You can request it with "GET" from: http://localhost:3000/movies/${result._id}`
+                                })
+                                // .json({
+                                //     message: "Fetched and saved movie data successfully",
+                                //     createdMovie: {
+                                //         title: result.title,
+                                //         genre: result.genre,
+                                //         _id: result._id,
+                                //         request: {
+                                //             type: "GET",
+                                //             url: "http://localhost:3000/movies/" + result._id
+                                //         }
+                                //     }
+                                // });
                             }).catch(err => {
                                 console.log(err);
                                 res.status(500).json({
@@ -150,28 +163,33 @@ router.post("/:movieId", (req, res, next) => {
     });
 });
 
-router.patch("/:movieId", checkAuth, (req, res, next) => {
-    const id = req.params.movieId;
-    const updateOps = {};
-    for (const ops of req.body) {
-        updateOps[ops.propName] = ops.value;
-    }
-    Movie.update({ _id: id }, {
-        $set: updateOps
-    })
-        .exec()
-        .then(result => {
-            console.log(result);
-            res.status(200).json(result)
+// Patching - not implemented on the frontend
+router.patch("/:movieId",
+    // Eventually checkAuth not used but left for the future just in case
+    // checkAuth, 
+    (req, res, next) => {
+        const id = req.params.movieId;
+        const updateOps = {};
+        for (const ops of req.body) {
+            updateOps[ops.propName] = ops.value;
+        }
+        Movie.update({ _id: id }, {
+            $set: updateOps
         })
-        .catch(err => {
-            console.log(err);
-            res.status(500).json({
-                error: err
+            .exec()
+            .then(result => {
+                console.log(result);
+                res.status(200).json(result)
             })
-        });
-});
+            .catch(err => {
+                console.log(err);
+                res.status(500).json({
+                    error: err
+                })
+            });
+    });
 
+// Deleting - not implemented on the frontend
 router.delete("/:movieId",
     // checkAuth,
     (req, res, next) => {

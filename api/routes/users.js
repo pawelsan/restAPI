@@ -2,10 +2,12 @@ const express = require("express");
 const router = express.Router();
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
+const passport = require("passport");
 
-require('dotenv').config();
-const JWT_KEY = process.env.JWT_KEY;
+// Leftovers from token authentication option
+// const jwt = require("jsonwebtoken");
+// require('dotenv').config();
+// const JWT_KEY = process.env.JWT_KEY;
 
 const User = require("../models/user");
 
@@ -35,7 +37,7 @@ router.post("/signup", (req, res, next) => {
     }
 
     if (password.length < 6) {
-        errors.push({ msg: 'Password must be at least 6 characters' });
+        errors.push({ msg: 'Password must be at least 6 characters long' });
     }
 
     // If the data does not pass validation, rerender the signup page
@@ -54,9 +56,14 @@ router.post("/signup", (req, res, next) => {
             .then(user => {
                 // If user found meaning if array of users is not empty
                 if (user.length >= 1) {
-                    return res.status(409).json({
-                        message: "User with provided email address already exists in the database"
-                    })
+                    errors.push({ msg: 'User with provided email address already exists in the database. Try logging in.' });
+                    return res.status(409).render('signup', {
+                        errors,
+                        email,
+                        password,
+                        password2
+                    });
+
                 } else {
                     // Encrypting the password
                     bcrypt.hash(password, 10, (err, hash) => {
@@ -73,10 +80,8 @@ router.post("/signup", (req, res, next) => {
                             user
                                 .save()
                                 .then(result => {
-                                    console.log(result);
-                                    res.status(201).json({
-                                        message: "User created"
-                                    });
+                                    req.flash("success_msg", "You are now registered and can log in");
+                                    res.status(201).redirect("/users/login");
                                 })
                                 .catch(err => {
                                     res.status(500).json({
@@ -97,49 +102,63 @@ router.get("/login", (req, res) => res.render("login"));
 // Login Handle
 
 router.post("/login", (req, res, next) => {
-    User.find({ email: req.body.email })
-        .exec()
-        .then(user => {
-            if (user.length < 1) {
-                return res.status(401).json({
-                    message: "Auth failed"
-                })
-            }
-            bcrypt.compare(req.body.password, user[0].password, (err, result) => {
-                if (err) {
-                    return res.status(401).json({
-                        message: "Auth failed"
-                    })
-                } else if (result) {
-                    // creating token with jsonwebtoken
-                    const token = jwt.sign({
-                        email: user[0].email,
-                        userId: user[0]._id,
-                    },
-                        JWT_KEY,
-                        {
-                            expiresIn: "1h"
-                        },
-                    );
-                    return res.status(200).json({
-                        message: "Auth successful",
-                        token,
-                    });
-                } else {
-                    return res.status(401).json({
-                        message: "Auth failed"
-                    })
-                }
-            })
-        })
-        .catch(err => {
-            res.status(500).json({
-                error: err
-            })
-        });
+    passport.authenticate('local', {
+        successRedirect: '/dashboard',
+        failureRedirect: '/users/login',
+        failureFlash: true
+    })(req, res, next);
+    // Leftovers from token authentication option considered previously
+    // User.find({ email: req.body.email })
+    //     .exec()
+    //     .then(user => {
+    //         if (user.length < 1) {
+    //             return res.status(401).json({
+    //                 message: "Auth failed"
+    //             })
+    //         }
+    //         bcrypt.compare(req.body.password, user[0].password, (err, result) => {
+    //             if (err) {
+    //                 return res.status(401).json({
+    //                     message: "Auth failed"
+    //                 })
+    //             } else if (result) {
+    //                 // creating token with jsonwebtoken
+    //                 const token = jwt.sign({
+    //                     email: user[0].email,
+    //                     userId: user[0]._id,
+    //                 },
+    //                     JWT_KEY,
+    //                     {
+    //                         expiresIn: "1h"
+    //                     },
+    //                 );
+    //                 return res.status(200).json({
+    //                     message: "Auth successful",
+    //                     token,
+    //                 });
+    //             } else {
+    //                 return res.status(401).json({
+    //                     message: "Auth failed"
+    //                 })
+    //             }
+    //         })
+    //     })
+    //     .catch(err => {
+    //         res.status(500).json({
+    //             error: err
+    //         })
+    //     });
 })
 
-// Deleting users
+// Logout handle
+router.get('/logout', (req, res) => {
+    // Logout function from passport middleware
+    req.logout();
+    req.flash('success_msg', 'You are logged out');
+    res.redirect('/');
+});
+
+// Deleting users - not implemented on the frontend
 router.delete("/:userId", (req, res, next) => {
     User.deleteOne({ _id: req.params.userId })
         .exec()
