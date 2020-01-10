@@ -23,7 +23,7 @@ router.get("/", (req, res, next) => {
                         // request for adding more info about the movie
                         request: {
                             type: "GET",
-                            url: "https://movieapi2020.herokuapp.com" + doc._id
+                            url: "https://movieapi2020.herokuapp.com/movies/" + doc._id
                         }
                     }
                 })
