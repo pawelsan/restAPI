@@ -1,6 +1,6 @@
 const http = require("http");
 const app = require("./app");
-let port = process.env.port;
+let port = process.env.PORT;
 if (port == null || port == "") {
     port = 3000;
 }
