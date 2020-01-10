@@ -24,7 +24,7 @@ router.get("/", (req, res, next) => {
                         content: doc.content,
                         request: {
                             type: "GET",
-                            url: "http://localhost:3000/comments/" + doc._id
+                            url: "https://movieapi2020.herokuapp.com/comments/" + doc._id
                         }
                     }
                 }),
@@ -61,7 +61,7 @@ router.post("/",
                     });
                     comment.save().then(result => {
                         res.status(201).render('post-status', {
-                            message: `Created comment: "${result.content}". With relation to ${movie.title} (movie ID: ${result.movie}). Comment ID ${result._id}. You can request it with "GET" from: http://localhost:3000/movies/${result._id}`
+                            message: `Created comment: "${result.content}". With relation to ${movie.title} (movie ID: ${result.movie}). Comment ID ${result._id}. You can request it with "GET" from: https://movieapi2020.herokuapp.com/movies/${result._id}`
                         })
                     }).catch(err => {
                         console.log(500).json({
