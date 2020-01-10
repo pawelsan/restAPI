@@ -1,5 +1,5 @@
 # restAPI
-> This app is a node.js/express/mongoDB/passport simple REST API connected to OMDb API.
+> This app is a node.js, express, mongoDB, passport simple REST API connected to OMDb API.
 It is deployed [here](https://movieapi2020.herokuapp.com/).
 
 ## Table of contents
@@ -44,7 +44,7 @@ Project's 1st phase finished.
 ## Some of the resources used:
 Project to a varying extent inspired or based on:
 * [Academind](https://www.youtube.com/watch?v=0oXYLzuucwE&list=PL55RiY5tL51q4D-B63KBnygU6opNPFk_q)
-* [Traversy Media](https://www.youtube.com/watch?v=0oXYLzuucwE&list=PL55RiY5tL51q4D-B63KBnygU6opNPFk_q)
+* [Traversy Media](https://www.youtube.com/watch?v=6FOq4cUdH8k)
 * [Angela Yu](https://www.udemy.com/course/the-complete-web-development-bootcamp/)
 
 ## Contact
