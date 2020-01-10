@@ -26,10 +26,10 @@ app.use(express.static("public"));
 
 // Securing database password
 require('dotenv').config();
-const password = process.env.PASSWORD
+const mongodb = process.env.MONGODB_URL
 
-// DB Config
-mongoose.connect("mongodb+srv://pawelsan:" + password + "@node-restapi-movies-v7xnu.mongodb.net/test?retryWrites=true&w=majority", {
+
+mongoose.connect(mongodb, {
     useNewUrlParser: true,
     useUnifiedTopology: true
 }).then(() => console.log('DB Connected!'))
