@@ -92,7 +92,7 @@ router.post("/",
                             })
                             movie.save().then(result => {
                                 res.status(201).render('post-status', {
-                                    message: `Fetched and saved movie data successfully. Created movie: ${result.title} (${result.genre}), with ID of ${result._id}. You can request it with "GET" from: http://localhost:3000/movies/${result._id}`
+                                    message: `Fetched and saved movie data successfully. Created movie: ${result.title} (${result.genre}), with ID of ${result._id}. You can request it with "GET" from: https://movieapi2020.herokuapp.com/movies/${result._id}`
                                 })
                             }).catch(err => {
                                 console.log(err);
@@ -119,7 +119,7 @@ router.get("/:movieId", (req, res, next) => {
                     request: {
                         type: "GET",
                         description: "Get all movies",
-                        url: "http://localhost:3000/movies"
+                        url: "https://movieapi2020.herokuapp.com/movies"
                     }
                 });
             }

@@ -87,7 +87,7 @@ router.get("/:commentId", (req, res, next) => {
                 comment,
                 request: {
                     type: "GET",
-                    url: "http://localhost:3000/comments",
+                    url: "https://movieapi2020.herokuapp.com/comments",
                 }
             })
         })
@@ -109,7 +109,7 @@ router.delete("/:commentId",
                     message: "Comment deleted",
                     request: {
                         type: "POST",
-                        url: "http://localhost:3000/comments",
+                        url: "https://movieapi2020.herokuapp.com/comments",
                     }
                 });
             })
