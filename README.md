@@ -29,7 +29,7 @@ The purpose of the project is related to my ambition of becoming a professional 
 ## Features
 * The app GETs data requests from /movies, /movies/:movieId, and /comments. No API key required.
   - GET /movies fetches a JSON list of all movies already present in the application database.
-  - GET /movies/:movieId fetches a JSON file with details about a given movie.
+  - GET /movies/:movieId fetches a JSON list with details about a given movie.
   - GET /comments fetches a JSON list of all comments present in the application database.
 * The app provides sign-up and log-in fuctionality. Passwords are bcrypted and hashed.
 * Registered users may POST movies or own comments:
